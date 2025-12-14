@@ -2,10 +2,7 @@
    Configuración general
 ========================= */
 
-// Reemplace por el número real (código país + número), sin + ni espacios.
-const WHATSAPP_NUMBER = "51955857588";
-
-// URL obligatoria para TODAS las imágenes
+const WHATSAPP_NUMBER = "51999999999";
 const IMAGE_URL = "https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png";
 
 /* =========================
@@ -169,16 +166,13 @@ const CATEGORY_LABEL = {
 };
 
 /* =========================
-   Stock aleatorio (determinístico por sesión)
-   - Variantes: producto + medida + color => stock 0..30
-   - Total por producto: suma de todas sus variantes
+   Stock aleatorio determinístico por sesión (0..30)
 ========================= */
 
-const variantStockMap = new Map(); // key: "productId__sizeLabel__color" => stock
+const variantStockMap = new Map();
 
 function hashStringToInt(str) {
-  // Hash simple y estable para esta sesión
-  let h = 2166136261; // FNV-like
+  let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
     h = Math.imul(h, 16777619);
@@ -190,8 +184,7 @@ function getVariantStock(productId, sizeLabel, color) {
   const key = `${productId}__${sizeLabel}__${color}`;
   if (variantStockMap.has(key)) return variantStockMap.get(key);
 
-  // “Aleatorio” pero determinístico: 0..30
-  const n = hashStringToInt(key) % 31;
+  const n = hashStringToInt(key) % 31; // 0..30
   variantStockMap.set(key, n);
   return n;
 }
@@ -210,15 +203,18 @@ function getProductTotalStock(product) {
    Estado
 ========================= */
 
-let cart = new Map(); // key: variantKey, value: { productId, name, size, color, unitPrice, qty, img }
+let cart = new Map();
 let currentFilter = "all";
 let currentSearch = "";
 
-// Modal state
+// Modal
 let modalProduct = null;
 let modalQty = 1;
 let selectedSizeIndex = -1;
 let selectedColor = "";
+
+// Stock actual de la variante seleccionada (null = no listo)
+let currentVariantStock = null;
 
 /* =========================
    Toast
@@ -316,7 +312,7 @@ function openWhatsApp() {
 }
 
 /* =========================
-   Render: Catálogo (sin precios, con stock total)
+   Render: Catálogo (stock total)
 ========================= */
 
 const productsGrid = document.getElementById("productsGrid");
@@ -486,7 +482,7 @@ closeCartBtn.addEventListener("click", closeCart);
 cartBackdrop.addEventListener("click", closeCart);
 
 /* =========================
-   Modal: Stock por variante (medida + color)
+   Modal: Stock por variante y límite de cantidad
 ========================= */
 
 const productModal = document.getElementById("productModal");
@@ -510,26 +506,47 @@ const modalStockWarning = document.getElementById("modalStockWarning");
 const modalAddBtn = document.getElementById("modalAddBtn");
 const modalError = document.getElementById("modalError");
 
+function renderModalQty() {
+  modalQtyEl.textContent = String(modalQty);
+}
+
 function resetModalStockUI() {
+  currentVariantStock = null;
   modalStockText.textContent = "Stock: —";
   modalStockWarning.hidden = true;
   modalAddBtn.disabled = false;
+
+  // Mientras no haya variante lista, el "+" puede funcionar sin límite,
+  // pero por UX mantenemos el qty en 1.
+  modalQty = 1;
+  renderModalQty();
 }
 
 function updateStockUI(stock) {
+  currentVariantStock = stock;
   modalStockText.textContent = `Stock: ${stock}`;
 
   if (stock === 0) {
     modalStockWarning.hidden = false;
     modalAddBtn.disabled = true;
+    // Si stock es 0, fijamos cantidad a 1 (no se podrá enviar igual)
+    modalQty = 1;
+    renderModalQty();
   } else {
     modalStockWarning.hidden = true;
     modalAddBtn.disabled = false;
+
+    // Si el usuario tenía una cantidad mayor al stock, se ajusta
+    if (modalQty > stock) {
+      modalQty = stock;
+      renderModalQty();
+    }
   }
 }
 
 function computeAndRenderVariantStockIfReady() {
   if (!modalProduct) return;
+
   if (selectedSizeIndex < 0 || !selectedColor) {
     resetModalStockUI();
     return;
@@ -551,15 +568,15 @@ function openProductModal(productId) {
 
   modalImg.src = product.img;
   modalName.textContent = product.name;
-  modalQtyEl.textContent = "1";
+  renderModalQty();
   modalPrice.textContent = "—";
 
   modalError.hidden = true;
 
-  // Al abrir un nuevo producto, el mensaje de stock NO debe persistir
+  // Al abrir un nuevo producto, el mensaje de stock NO persiste
   resetModalStockUI();
 
-  // Poblar combos
+  // Combos
   modalSizeSelect.innerHTML = `<option value="">Seleccione una medida...</option>`;
   product.sizes.forEach((s, idx) => {
     const opt = document.createElement("option");
@@ -585,7 +602,7 @@ function openProductModal(productId) {
 }
 
 function closeProductModal() {
-  // Al cerrar, también se oculta el mensaje
+  // Al cerrar, se oculta el mensaje de stock (según aclaración)
   modalStockWarning.hidden = true;
   modalError.hidden = true;
   modalAddBtn.disabled = false;
@@ -596,7 +613,7 @@ function closeProductModal() {
 }
 
 modalSizeSelect.addEventListener("change", () => {
-  // Aclaración: el mensaje desaparece cuando el cliente cambia medida
+  // El mensaje desaparece cuando cambia medida
   modalStockWarning.hidden = true;
   modalError.hidden = true;
 
@@ -616,7 +633,7 @@ modalSizeSelect.addEventListener("change", () => {
 });
 
 modalColorSelect.addEventListener("change", () => {
-  // Aclaración: el mensaje desaparece cuando el cliente cambia color
+  // El mensaje desaparece cuando cambia color
   modalStockWarning.hidden = true;
   modalError.hidden = true;
 
@@ -624,13 +641,22 @@ modalColorSelect.addEventListener("change", () => {
   computeAndRenderVariantStockIfReady();
 });
 
+/* ====== LÍMITE DE CANTIDAD SEGÚN STOCK ====== */
 modalDecBtn.addEventListener("click", () => {
   modalQty = Math.max(1, modalQty - 1);
-  modalQtyEl.textContent = String(modalQty);
+  renderModalQty();
 });
+
 modalIncBtn.addEventListener("click", () => {
-  modalQty += 1;
-  modalQtyEl.textContent = String(modalQty);
+  // Si ya hay un stock calculado (variante lista), limitar a ese stock
+  if (typeof currentVariantStock === "number" && currentVariantStock >= 0) {
+    if (currentVariantStock === 0) return; // no subir si no hay stock
+    modalQty = Math.min(currentVariantStock, modalQty + 1);
+  } else {
+    // Si aún no se eligió medida+color, solo permitir crecer moderado
+    modalQty = Math.min(99, modalQty + 1);
+  }
+  renderModalQty();
 });
 
 closeProductModalBtn.addEventListener("click", closeProductModal);
@@ -639,7 +665,6 @@ productModalBackdrop.addEventListener("click", closeProductModal);
 modalAddBtn.addEventListener("click", () => {
   if (!modalProduct) return;
 
-  // Validación: medida y color obligatorios
   if (selectedSizeIndex < 0 || !selectedColor) {
     modalError.hidden = false;
     return;
@@ -648,10 +673,15 @@ modalAddBtn.addEventListener("click", () => {
   const s = modalProduct.sizes[selectedSizeIndex];
   const stock = getVariantStock(modalProduct.id, s.label, selectedColor);
 
-  // Si stock = 0, no permitir (botón ya está disabled, pero se valida por seguridad)
   if (stock === 0) {
     updateStockUI(0);
     return;
+  }
+
+  // Seguridad: nunca agregar más que el stock
+  if (modalQty > stock) {
+    modalQty = stock;
+    renderModalQty();
   }
 
   const key = variantKey(modalProduct.id, s.label, selectedColor);
