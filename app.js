@@ -2,7 +2,7 @@
    Configuración general
 ========================= */
 
-const WHATSAPP_NUMBER = "51999999999";
+const WHATSAPP_NUMBER = "51955857588";
 const IMAGE_URL = "https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png";
 
 /* =========================
