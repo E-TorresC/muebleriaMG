@@ -2,7 +2,10 @@
    Configuración general
 ========================= */
 
-const WHATSAPP_NUMBER = "51999999999";
+// Reemplace por el número real (código país + número), sin + ni espacios.
+const WHATSAPP_NUMBER = "51955857588";
+
+// URL obligatoria para TODAS las imágenes
 const IMAGE_URL = "https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png";
 
 /* =========================
@@ -166,17 +169,54 @@ const CATEGORY_LABEL = {
 };
 
 /* =========================
+   Stock aleatorio (determinístico por sesión)
+   - Variantes: producto + medida + color => stock 0..30
+   - Total por producto: suma de todas sus variantes
+========================= */
+
+const variantStockMap = new Map(); // key: "productId__sizeLabel__color" => stock
+
+function hashStringToInt(str) {
+  // Hash simple y estable para esta sesión
+  let h = 2166136261; // FNV-like
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function getVariantStock(productId, sizeLabel, color) {
+  const key = `${productId}__${sizeLabel}__${color}`;
+  if (variantStockMap.has(key)) return variantStockMap.get(key);
+
+  // “Aleatorio” pero determinístico: 0..30
+  const n = hashStringToInt(key) % 31;
+  variantStockMap.set(key, n);
+  return n;
+}
+
+function getProductTotalStock(product) {
+  let total = 0;
+  for (const s of product.sizes) {
+    for (const c of product.colors) {
+      total += getVariantStock(product.id, s.label, c);
+    }
+  }
+  return total;
+}
+
+/* =========================
    Estado
 ========================= */
 
-let cart = new Map();
+let cart = new Map(); // key: variantKey, value: { productId, name, size, color, unitPrice, qty, img }
 let currentFilter = "all";
 let currentSearch = "";
 
+// Modal state
 let modalProduct = null;
 let modalQty = 1;
-
-/* Para combos: guardamos el índice seleccionado en sizes */
 let selectedSizeIndex = -1;
 let selectedColor = "";
 
@@ -276,7 +316,7 @@ function openWhatsApp() {
 }
 
 /* =========================
-   Render: Catálogo (sin precios)
+   Render: Catálogo (sin precios, con stock total)
 ========================= */
 
 const productsGrid = document.getElementById("productsGrid");
@@ -301,6 +341,8 @@ function renderProducts() {
 
   for (const p of list) {
     const categoryTag = CATEGORY_LABEL[p.category] || "Mueble";
+    const totalStock = getProductTotalStock(p);
+
     const card = document.createElement("article");
     card.className = "card";
     card.innerHTML = `
@@ -308,7 +350,10 @@ function renderProducts() {
       <div class="card__body">
         <h3 class="card__title">${p.name}</h3>
         <div class="card__meta">
-          <span class="tag">${categoryTag}</span>
+          <div class="metaLeft">
+            <span class="tag">${categoryTag}</span>
+            <span class="stockBadge">Stock: ${totalStock}</span>
+          </div>
         </div>
         <div class="card__actions">
           <button class="btn btn--primary" type="button" data-config="${p.id}">
@@ -441,7 +486,7 @@ closeCartBtn.addEventListener("click", closeCart);
 cartBackdrop.addEventListener("click", closeCart);
 
 /* =========================
-   Modal: Combos (medida + color obligatorios)
+   Modal: Stock por variante (medida + color)
 ========================= */
 
 const productModal = document.getElementById("productModal");
@@ -459,8 +504,41 @@ const modalIncBtn = document.getElementById("modalIncBtn");
 const modalSizeSelect = document.getElementById("modalSizeSelect");
 const modalColorSelect = document.getElementById("modalColorSelect");
 
+const modalStockText = document.getElementById("modalStockText");
+const modalStockWarning = document.getElementById("modalStockWarning");
+
 const modalAddBtn = document.getElementById("modalAddBtn");
 const modalError = document.getElementById("modalError");
+
+function resetModalStockUI() {
+  modalStockText.textContent = "Stock: —";
+  modalStockWarning.hidden = true;
+  modalAddBtn.disabled = false;
+}
+
+function updateStockUI(stock) {
+  modalStockText.textContent = `Stock: ${stock}`;
+
+  if (stock === 0) {
+    modalStockWarning.hidden = false;
+    modalAddBtn.disabled = true;
+  } else {
+    modalStockWarning.hidden = true;
+    modalAddBtn.disabled = false;
+  }
+}
+
+function computeAndRenderVariantStockIfReady() {
+  if (!modalProduct) return;
+  if (selectedSizeIndex < 0 || !selectedColor) {
+    resetModalStockUI();
+    return;
+  }
+
+  const s = modalProduct.sizes[selectedSizeIndex];
+  const stock = getVariantStock(modalProduct.id, s.label, selectedColor);
+  updateStockUI(stock);
+}
 
 function openProductModal(productId) {
   const product = PRODUCTS.find((p) => p.id === productId);
@@ -478,23 +556,10 @@ function openProductModal(productId) {
 
   modalError.hidden = true;
 
+  // Al abrir un nuevo producto, el mensaje de stock NO debe persistir
+  resetModalStockUI();
+
   // Poblar combos
-  fillSizeSelect(product);
-  fillColorSelect(product);
-
-  productModal.hidden = false;
-  productModalBackdrop.hidden = false;
-  closeProductModalBtn.focus();
-  document.body.style.overflow = "hidden";
-}
-
-function closeProductModal() {
-  productModal.hidden = true;
-  productModalBackdrop.hidden = true;
-  document.body.style.overflow = "";
-}
-
-function fillSizeSelect(product) {
   modalSizeSelect.innerHTML = `<option value="">Seleccione una medida...</option>`;
   product.sizes.forEach((s, idx) => {
     const opt = document.createElement("option");
@@ -503,9 +568,7 @@ function fillSizeSelect(product) {
     modalSizeSelect.appendChild(opt);
   });
   modalSizeSelect.value = "";
-}
 
-function fillColorSelect(product) {
   modalColorSelect.innerHTML = `<option value="">Seleccione un color...</option>`;
   product.colors.forEach((c) => {
     const opt = document.createElement("option");
@@ -514,24 +577,51 @@ function fillColorSelect(product) {
     modalColorSelect.appendChild(opt);
   });
   modalColorSelect.value = "";
+
+  productModal.hidden = false;
+  productModalBackdrop.hidden = false;
+  closeProductModalBtn.focus();
+  document.body.style.overflow = "hidden";
+}
+
+function closeProductModal() {
+  // Al cerrar, también se oculta el mensaje
+  modalStockWarning.hidden = true;
+  modalError.hidden = true;
+  modalAddBtn.disabled = false;
+
+  productModal.hidden = true;
+  productModalBackdrop.hidden = true;
+  document.body.style.overflow = "";
 }
 
 modalSizeSelect.addEventListener("change", () => {
+  // Aclaración: el mensaje desaparece cuando el cliente cambia medida
+  modalStockWarning.hidden = true;
   modalError.hidden = true;
+
   const v = modalSizeSelect.value;
   if (!v) {
     selectedSizeIndex = -1;
     modalPrice.textContent = "—";
+    computeAndRenderVariantStockIfReady();
     return;
   }
+
   selectedSizeIndex = Number(v);
   const s = modalProduct.sizes[selectedSizeIndex];
   modalPrice.textContent = money(s.price);
+
+  computeAndRenderVariantStockIfReady();
 });
 
 modalColorSelect.addEventListener("change", () => {
+  // Aclaración: el mensaje desaparece cuando el cliente cambia color
+  modalStockWarning.hidden = true;
   modalError.hidden = true;
+
   selectedColor = modalColorSelect.value || "";
+  computeAndRenderVariantStockIfReady();
 });
 
 modalDecBtn.addEventListener("click", () => {
@@ -556,6 +646,14 @@ modalAddBtn.addEventListener("click", () => {
   }
 
   const s = modalProduct.sizes[selectedSizeIndex];
+  const stock = getVariantStock(modalProduct.id, s.label, selectedColor);
+
+  // Si stock = 0, no permitir (botón ya está disabled, pero se valida por seguridad)
+  if (stock === 0) {
+    updateStockUI(0);
+    return;
+  }
+
   const key = variantKey(modalProduct.id, s.label, selectedColor);
 
   const existing = cart.get(key);
