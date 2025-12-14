@@ -1,234 +1,282 @@
 <!doctype html>
 <html lang="es">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Mueblería MG | Muebles para hogar y oficina</title>
-    <meta name="description"
-        content="Mueblería MG: muebles de melamina y a medida para hogar y oficina. Catálogo, ofertas y pedidos por WhatsApp." />
-    <link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mueblería MG | Muebles para hogar y oficina</title>
+  <meta name="description" content="Mueblería MG: muebles de melamina y a medida para hogar y oficina. Catálogo, ofertas y pedidos por WhatsApp." />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-    <!-- Topbar -->
-    <header class="topbar" role="banner">
-        <div class="container topbar__inner">
-            <a class="brand" href="#inicio" aria-label="Ir al inicio">
-                <span class="brand__mark" aria-hidden="true">MG</span>
-                <span class="brand__text">
-                    <strong>Mueblería MG</strong>
-                    <small>Muebles para hogar y oficina</small>
-                </span>
-            </a>
+  <!-- Topbar -->
+  <header class="topbar" role="banner">
+    <div class="container topbar__inner">
+      <a class="brand" href="#inicio" aria-label="Ir al inicio">
+        <span class="brand__mark" aria-hidden="true">MG</span>
+        <span class="brand__text">
+          <strong>Mueblería MG</strong>
+          <small>Muebles para hogar y oficina</small>
+        </span>
+      </a>
 
-            <div class="footer__links">
-                <a href="#inicio">Inicio</a>
-                <a href="#catalogo">Catálogo</a>
+      <nav class="topbar__actions" aria-label="Acciones principales">
+        <button id="openCartBtn" class="btn btn--ghost" type="button" aria-haspopup="dialog" aria-controls="cartDrawer">
+          <span class="icon" aria-hidden="true">🛒</span>
+          <span>Carrito</span>
+          <span id="cartCountBadge" class="badge" aria-label="Productos en el carrito">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
 
-                <nav class="topbar__actions" aria-label="Acciones principales">
-                    <button id="openCartBtn" class="btn btn--ghost" type="button" aria-haspopup="dialog"
-                        aria-controls="cartDrawer">
-                        <span class="icon" aria-hidden="true">🛒</span>
-                        <span>Carrito</span>
-                        <span id="cartCountBadge" class="badge" aria-label="Productos en el carrito">0</span>
-                    </button>
-                </nav>
+  <main id="inicio">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="pill">Fabricación • Melamina • Envíos coordinados</p>
+          <h1>Muebles con estilo para su hogar y su oficina</h1>
+          <p class="hero__subtitle">
+            Seleccione el producto, elija medida y color, y envíe su pedido por WhatsApp.
+          </p>
+
+          <div class="search" role="search">
+            <label class="sr-only" for="searchInput">Buscar producto</label>
+            <div class="search__box">
+              <span class="icon" aria-hidden="true">🔎</span>
+              <input id="searchInput" type="search" placeholder="Busque: repostero, alacena, ropero, librero..." autocomplete="off" />
+              <button id="clearSearchBtn" class="btn btn--ghost btn--icon" type="button" aria-label="Limpiar búsqueda">✕</button>
             </div>
+
+            <div id="searchSuggestions" class="suggestions" role="listbox" aria-label="Sugerencias de búsqueda"></div>
+
+            <div class="hero__cta">
+              <a class="btn btn--primary" href="#catalogo">Ver catálogo</a>
+              <button id="whatsHeroBtn" class="btn btn--secondary" type="button">
+                Pedir por WhatsApp
+              </button>
+            </div>
+
+            <p class="hint">Nota: El precio se define en el modal según la medida seleccionada.</p>
+          </div>
         </div>
+
+        <div class="hero__media" aria-hidden="true">
+          <div class="hero__card">
+            <img
+              src="https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png"
+              alt=""
+              loading="lazy"
+            />
+            <div class="hero__card__overlay">
+              <div class="stat">
+                <strong>Diseños</strong>
+                <span>modernos y funcionales</span>
+              </div>
+              <div class="stat">
+                <strong>Melamina</strong>
+                <span>acabados premium</span>
+              </div>
+              <div class="stat">
+                <strong>Atención</strong>
+                <span>por WhatsApp</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" aria-label="Beneficios">
+      <div class="container">
+        <div class="features__grid">
+          <article class="feature">
+            <h3>Hecho para durar</h3>
+            <p>Diseños pensados para uso diario en hogar u oficina.</p>
+          </article>
+          <article class="feature">
+            <h3>Personalización</h3>
+            <p>Medidas y colores según su necesidad.</p>
+          </article>
+          <article class="feature">
+            <h3>Pedido rápido</h3>
+            <p>Seleccione opciones y envíe el pedido por WhatsApp.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catalog -->
+    <section id="catalogo" class="catalog" aria-label="Catálogo">
+      <div class="container">
+        <div class="sectionHead">
+          <div>
+            <h2>Catálogo</h2>
+            <p>Seleccione el producto y luego elija medida y color antes de enviarlo al carrito.</p>
+          </div>
+
+          <div class="chips" aria-label="Filtros rápidos">
+            <button class="chip is-active" type="button" data-filter="all">Todos</button>
+            <button class="chip" type="button" data-filter="cocina">Cocina</button>
+            <button class="chip" type="button" data-filter="dormitorio">Dormitorio</button>
+            <button class="chip" type="button" data-filter="lavanderia">Lavandería</button>
+            <button class="chip" type="button" data-filter="oficina">Estudio y Oficina</button>
+            <button class="chip" type="button" data-filter="despensa">Despensa</button>
+          </div>
+        </div>
+
+        <div id="productsGrid" class="grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact" aria-label="Contacto">
+      <div class="container contact__grid">
+        <div class="contact__card">
+          <h2>¿Desea un mueble a medida?</h2>
+          <p>Indique el producto, medida aproximada, color y distrito. Le responderemos con una cotización referencial.</p>
+
+          <div class="contact__actions">
+            <button id="openCartBtn2" class="btn btn--primary" type="button">Ver carrito</button>
+            <button id="whatsContactBtn" class="btn btn--secondary" type="button">Escribir por WhatsApp</button>
+          </div>
+
+          <ul class="contact__list">
+            <li><strong>Horario:</strong> Lun–Sáb</li>
+            <li><strong>Entrega:</strong> Coordinada</li>
+            <li><strong>Material:</strong> Melamina</li>
+          </ul>
+        </div>
+
+        <div class="contact__media" aria-hidden="true">
+          <img
+            src="https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png"
+            alt=""
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <strong>Mueblería MG</strong>
+        <span>© <span id="year"></span> • Todos los derechos reservados</span>
+      </div>
+      <div class="footer__links">
+        <a href="#inicio">Inicio</a>
+        <a href="#catalogo">Catálogo</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cart Drawer -->
+  <div id="cartBackdrop" class="backdrop" hidden></div>
+
+  <aside id="cartDrawer" class="drawer" role="dialog" aria-modal="true" aria-label="Carrito de compras" hidden>
+    <header class="drawer__head">
+      <div>
+        <h3>Carrito</h3>
+        <p class="drawer__subtitle">Revise sus productos y envíe el pedido por WhatsApp.</p>
+      </div>
+      <button id="closeCartBtn" class="btn btn--ghost btn--icon" type="button" aria-label="Cerrar carrito">✕</button>
     </header>
 
-    <main id="inicio">
-        <!-- Hero -->
-        <section class="hero">
-            <div class="container hero__grid">
-                <div class="hero__content">
-                    <p class="pill">Fabricación • Melamina • Envíos coordinados</p>
-                    <h1>Muebles con estilo para su hogar y su oficina</h1>
-                    <p class="hero__subtitle">
-                        Explore una selección referencial y agregue al carrito para armar su pedido.
-                        Luego, envíelo por WhatsApp con un mensaje ya redactado.
-                    </p>
+    <div class="drawer__body">
+      <div id="cartEmpty" class="empty">
+        <p><strong>Su carrito está vacío.</strong></p>
+        <p>Agregue productos desde el catálogo para armar su pedido.</p>
+      </div>
 
-                    <!-- Search -->
-                    <div class="search" role="search">
-                        <label class="sr-only" for="searchInput">Buscar producto</label>
-                        <div class="search__box">
-                            <span class="icon" aria-hidden="true">🔎</span>
-                            <input id="searchInput" type="search" placeholder="Busque: ropero, reposteros, zapatera..."
-                                autocomplete="off" />
-                            <button id="clearSearchBtn" class="btn btn--ghost btn--icon" type="button"
-                                aria-label="Limpiar búsqueda">✕</button>
-                        </div>
-
-                        <div id="searchSuggestions" class="suggestions" role="listbox"
-                            aria-label="Sugerencias de búsqueda"></div>
-
-                        <div class="hero__cta">
-                            <a class="btn btn--primary" href="#catalogo">Ver catálogo</a>
-                            <button id="whatsHeroBtn" class="btn btn--secondary" type="button">
-                                Pedir por WhatsApp
-                            </button>
-                        </div>
-
-                        <p class="hint">
-                            Nota: El buscador y el catálogo son demostrativos. Podrá conectarlos a su backend más
-                            adelante.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="hero__media" aria-hidden="true">
-                    <div class="hero__card">
-                        <img src="https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png"
-                            alt="" loading="lazy" />
-                        <div class="hero__card__overlay">
-                            <div class="stat">
-                                <strong>Diseños</strong>
-                                <span>modernos y funcionales</span>
-                            </div>
-                            <div class="stat">
-                                <strong>Melamina</strong>
-                                <span>acabados premium</span>
-                            </div>
-                            <div class="stat">
-                                <strong>Atención</strong>
-                                <span>por WhatsApp</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features -->
-        <section class="features" aria-label="Beneficios">
-            <div class="container">
-                <div class="features__grid">
-                    <article class="feature">
-                        <h3>Hecho para durar</h3>
-                        <p>Diseños pensados para uso diario en hogar u oficina.</p>
-                    </article>
-                    <article class="feature">
-                        <h3>Personalización</h3>
-                        <p>Medidas, colores y distribución según su necesidad.</p>
-                    </article>
-                    <article class="feature">
-                        <h3>Pedido rápido</h3>
-                        <p>Arme su carrito y envíe el pedido por WhatsApp en segundos.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Catalog -->
-        <section id="catalogo" class="catalog" aria-label="Catálogo referencial">
-            <div class="container">
-                <div class="sectionHead">
-                    <div>
-                        <h2>Catálogo referencial</h2>
-                        <p>Productos de ejemplo para mostrar el carrito y el flujo por WhatsApp.</p>
-                    </div>
-
-                    <div class="chips" aria-label="Filtros rápidos">
-                        <button class="chip is-active" type="button" data-filter="all">Todos</button>
-                        <button class="chip" type="button" data-filter="cocina">Cocina</button>
-                        <button class="chip" type="button" data-filter="dormitorio">Dormitorio</button>
-                        <button class="chip" type="button" data-filter="oficina">Oficina</button>
-                        <button class="chip" type="button" data-filter="organizacion">Organización</button>
-                    </div>
-                </div>
-
-                <div id="productsGrid" class="grid" aria-live="polite"></div>
-            </div>
-        </section>
-
-        <!-- Contact -->
-        <section class="contact" aria-label="Contacto">
-            <div class="container contact__grid">
-                <div class="contact__card">
-                    <h2>¿Desea un mueble a medida?</h2>
-                    <p>
-                        Indique el producto, medidas aproximadas, color y distrito. Le responderemos con una cotización
-                        referencial.
-                    </p>
-
-                    <div class="contact__actions">
-                        <button id="openCartBtn2" class="btn btn--primary" type="button">Ver carrito</button>
-                        <button id="whatsContactBtn" class="btn btn--secondary" type="button">Escribir por
-                            WhatsApp</button>
-                    </div>
-
-                    <ul class="contact__list">
-                        <li><strong>Horario:</strong> Lun–Sáb</li>
-                        <li><strong>Entrega:</strong> Coordinada</li>
-                        <li><strong>Material:</strong> Melamina</li>
-                    </ul>
-                </div>
-
-                <div class="contact__media" aria-hidden="true">
-                    <img src="https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png" alt=""
-                        loading="lazy" />
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer" role="contentinfo">
-        <div class="container footer__inner">
-            <div class="footer__brand">
-                <strong>Mueblería MG</strong>
-                <span>© <span id="year"></span> • Todos los derechos reservados</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Cart Drawer -->
-    <div id="cartBackdrop" class="backdrop" hidden></div>
-
-    <aside id="cartDrawer" class="drawer" role="dialog" aria-modal="true" aria-label="Carrito de compras" hidden>
-        <header class="drawer__head">
-            <div>
-                <h3>Carrito</h3>
-                <p class="drawer__subtitle">Revise sus productos y envíe el pedido por WhatsApp.</p>
-            </div>
-            <button id="closeCartBtn" class="btn btn--ghost btn--icon" type="button"
-                aria-label="Cerrar carrito">✕</button>
-        </header>
-
-        <div class="drawer__body">
-            <div id="cartEmpty" class="empty">
-                <p><strong>Su carrito está vacío.</strong></p>
-                <p>Agregue productos desde el catálogo para armar su pedido.</p>
-            </div>
-
-            <div id="cartItems" class="cartItems" aria-label="Lista de productos del carrito"></div>
-        </div>
-
-        <footer class="drawer__footer">
-            <div class="totalRow">
-                <span>Total</span>
-                <strong id="cartTotal">S/ 0.00</strong>
-            </div>
-
-            <div class="drawer__footer__actions">
-                <button id="clearCartBtn" class="btn btn--ghost" type="button">Vaciar</button>
-                <button id="whatsBtn" class="btn btn--primary" type="button">Enviar por WhatsApp</button>
-            </div>
-
-            <p class="tiny">
-                El envío por WhatsApp genera un mensaje automático. Luego podrá conectarlo a productos reales y stock.
-            </p>
-        </footer>
-    </aside>
-
-    <!-- Toast -->
-    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden>
-        <span id="toastMsg">Producto agregado al carrito</span>
+      <div id="cartItems" class="cartItems" aria-label="Lista de productos del carrito"></div>
     </div>
 
-    <script src="./app.js"></script>
-</body>
+    <footer class="drawer__footer">
+      <div class="totalRow">
+        <span>Total</span>
+        <strong id="cartTotal">S/ 0.00</strong>
+      </div>
 
+      <div class="drawer__footer__actions">
+        <button id="clearCartBtn" class="btn btn--ghost" type="button">Vaciar</button>
+        <button id="whatsBtn" class="btn btn--primary" type="button">Enviar por WhatsApp</button>
+      </div>
+
+      <p class="tiny">El mensaje de WhatsApp incluye medida y color por cada producto.</p>
+    </footer>
+  </aside>
+
+  <!-- Product Config Modal -->
+  <div id="productModalBackdrop" class="modalBackdrop" hidden></div>
+
+  <section id="productModal" class="modal" role="dialog" aria-modal="true" aria-label="Configurar producto" hidden>
+    <header class="modal__head">
+      <div>
+        <h3 id="modalTitle">Configurar producto</h3>
+        <p class="modal__subtitle">Debe elegir medida y color para continuar.</p>
+      </div>
+      <button id="closeProductModalBtn" class="btn btn--ghost btn--icon" type="button" aria-label="Cerrar">✕</button>
+    </header>
+
+    <div class="modal__body">
+      <div class="modal__product">
+        <img id="modalImg" src="https://res.cloudinary.com/do4l2xa3x/image/upload/v1763765149/devops_ryyzzq.png" alt="Producto" />
+        <div class="modal__productInfo">
+          <p id="modalName" class="modal__name">Producto</p>
+
+          <p class="modal__priceRow">
+            <span>Precio unitario</span>
+            <strong id="modalPrice">—</strong>
+          </p>
+
+          <div class="modal__qty">
+            <span class="modal__label">Cantidad</span>
+            <div class="qty qty--modal" aria-label="Cantidad">
+              <button id="modalDecBtn" type="button" aria-label="Disminuir">−</button>
+              <span id="modalQty" aria-live="polite">1</span>
+              <button id="modalIncBtn" type="button" aria-label="Aumentar">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMBO BOXES -->
+      <div class="modal__form">
+        <div class="field">
+          <label class="field__label" for="modalSizeSelect">Medida</label>
+          <select id="modalSizeSelect" class="select" aria-label="Seleccionar medida">
+            <option value="">Seleccione una medida...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="modalColorSelect">Color</label>
+          <select id="modalColorSelect" class="select" aria-label="Seleccionar color">
+            <option value="">Seleccione un color...</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="modalError" class="modal__error" hidden>
+        Debe seleccionar una medida y un color para enviar al carrito.
+      </div>
+    </div>
+
+    <footer class="modal__footer">
+      <button id="modalAddBtn" class="btn btn--primary" type="button">Enviar al carrito</button>
+    </footer>
+  </section>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <span id="toastMsg">Producto agregado al carrito</span>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
 </html>
